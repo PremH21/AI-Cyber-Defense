@@ -8,3 +8,5 @@ __pycache__/
 venv/
 *.pyc
 ml-engine/models/
+federated/models/
+response-engine/models/
