@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>XAI Threat Explainability Panel — AI-Driven Autonomous Defense Framework</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #121820;
+    --panel-border: #1f2a36;
+    --text: #d7e0e8;
+    --text-dim: #7c8a99;
+    --accent-attack: #e5484d;
+    --accent-benign: #3ecf8e;
+    --accent-neutral: #4a90e2;
+    --mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    padding: 24px;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+  .subtitle { color: var(--text-dim); font-size: 12px; font-family: var(--mono); }
+  .dataset-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab-btn {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+  .tab-btn.active { color: var(--text); border-color: var(--accent-neutral); background: #16202c; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+  .incident-list {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .incident-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .incident-item:hover { background: #16202c; }
+  .incident-item.selected { background: #16202c; border-left: 3px solid var(--accent-neutral); }
+  .badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .badge.attack { background: rgba(229,72,77,0.15); color: var(--accent-attack); }
+  .badge.benign { background: rgba(62,207,142,0.15); color: var(--accent-benign); }
+  .detail-panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .verdict-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .verdict-label { font-size: 22px; font-weight: 700; }
+  .verdict-label.attack { color: var(--accent-attack); }
+  .verdict-label.benign { color: var(--accent-benign); }
+  .meta { color: var(--text-dim); font-family: var(--mono); font-size: 12px; margin-bottom: 24px; }
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .bar-row { margin-bottom: 14px; }
+  .bar-label-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; margin-bottom: 4px; }
+  .bar-feature-name { color: var(--text); }
+  .bar-value { color: var(--text-dim); }
+  .bar-track { background: #0b0f14; border-radius: 4px; height: 18px; position: relative; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; position: absolute; top: 0; }
+  .bar-fill.pos { background: var(--accent-attack); left: 50%; }
+  .bar-fill.neg { background: var(--accent-benign); right: 50%; }
+  .bar-center-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--panel-border); }
+  .contribution-text { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .explain-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-border);
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>XAI Threat Explainability Panel</h1>
+    <div class="subtitle">Innovation 6 — SHAP-based per-incident decision auditing</div>
+  </div>
+  <div class="subtitle">AI-Driven Autonomous Defense Framework · BLDEA CET</div>
+</header>
+
+<div class="dataset-tabs">
+  <button class="tab-btn active" data-dataset="unsw">UNSW-NB15</button>
+  <button class="tab-btn" data-dataset="cicids">CIC-IDS-2017</button>
+</div>
+
+<div class="layout">
+  <div class="incident-list" id="incidentList"></div>
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<script>
+const DATA = {"unsw": [{"test_row_index": 0, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "ackdat", "value": 1.4173480943806163, "shap_contribution": 0.4074341952800751, "direction": "pushes toward ATTACK"}, {"feature": "service", "value": -0.6700082952947668, "shap_contribution": -0.39071425795555115, "direction": "pushes toward BENIGN"}, {"feature": "sbytes", "value": -0.05885873695648699, "shap_contribution": 0.36342838406562805, "direction": "pushes toward ATTACK"}, {"feature": "smean", "value": -0.39901999344884165, "shap_contribution": 0.27416348457336426, "direction": "pushes toward ATTACK"}, {"feature": "sjit", "value": 0.14242033099345944, "shap_contribution": 0.26415514945983887, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 2, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "ackdat", "value": 1.4914227323687612, "shap_contribution": 1.6184362173080444, "direction": "pushes toward ATTACK"}, {"feature": "dmean", "value": 2.8465662320437484, "shap_contribution": 1.1873369216918945, "direction": "pushes toward ATTACK"}, {"feature": "dbytes", "value": 0.3134995492924015, "shap_contribution": 1.102699875831604, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": 0.9031889598302539, "shap_contribution": 0.839881956577301, "direction": "pushes toward ATTACK"}, {"feature": "dloss", "value": 0.36333687410319654, "shap_contribution": 0.7365164756774902, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 3, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "service", "value": 1.132207327457799, "shap_contribution": 0.8560003042221069, "direction": "pushes toward ATTACK"}, {"feature": "sbytes", "value": 0.23608484435968666, "shap_contribution": 0.2889118492603302, "direction": "pushes toward ATTACK"}, {"feature": "trans_depth", "value": 0.7603954451178982, "shap_contribution": 0.2852446138858795, "direction": "pushes toward ATTACK"}, {"feature": "dload", "value": -0.36933030362917546, "shap_contribution": 0.2816998064517975, "direction": "pushes toward ATTACK"}, {"feature": "ackdat", "value": 0.002294235401008218, "shap_contribution": 0.2816222608089447, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 5, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "ackdat", "value": 0.13100907760673766, "shap_contribution": 1.8987360000610352, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": -0.42628562852348084, "shap_contribution": 1.1313496828079224, "direction": "pushes toward ATTACK"}, {"feature": "tcprtt", "value": -0.18714446640773766, "shap_contribution": 0.9006308913230896, "direction": "pushes toward ATTACK"}, {"feature": "dbytes", "value": -0.111471331216197, "shap_contribution": 0.5762236714363098, "direction": "pushes toward ATTACK"}, {"feature": "dload", "value": -0.32596179698531397, "shap_contribution": -0.4871234595775604, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 7, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "sbytes", "value": -0.059698521151357535, "shap_contribution": 1.1538015604019165, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": -0.2603424212698322, "shap_contribution": 0.8315261602401733, "direction": "pushes toward ATTACK"}, {"feature": "smean", "value": -0.4778481835909631, "shap_contribution": 0.7379045486450195, "direction": "pushes toward ATTACK"}, {"feature": "tcprtt", "value": -0.2964365344093345, "shap_contribution": 0.6884520649909973, "direction": "pushes toward ATTACK"}, {"feature": "ackdat", "value": -0.2873050583801641, "shap_contribution": 0.5612421035766602, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 11, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dbytes", "value": -0.1052902531631169, "shap_contribution": 1.4180885553359985, "direction": "pushes toward ATTACK"}, {"feature": "service", "value": 1.132207327457799, "shap_contribution": 0.9452774524688721, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": 0.687990449267078, "shap_contribution": 0.6932616233825684, "direction": "pushes toward ATTACK"}, {"feature": "ackdat", "value": 0.2693122804187215, "shap_contribution": 0.6471021771430969, "direction": "pushes toward ATTACK"}, {"feature": "dmean", "value": 0.5714418817628364, "shap_contribution": 0.5099340081214905, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 15, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "synack", "value": -0.49330174788980846, "shap_contribution": 1.877651333808899, "direction": "pushes toward ATTACK"}, {"feature": "tcprtt", "value": -0.20365327220320673, "shap_contribution": 0.8083884716033936, "direction": "pushes toward ATTACK"}, {"feature": "ackdat", "value": 0.17764387552848548, "shap_contribution": 0.7387046813964844, "direction": "pushes toward ATTACK"}, {"feature": "dloss", "value": -0.09757036724331948, "shap_contribution": 0.5462394952774048, "direction": "pushes toward ATTACK"}, {"feature": "dmean", "value": -0.5141174510854843, "shap_contribution": 0.5064970850944519, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 17, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "sinpkt", "value": -0.09559833021860542, "shap_contribution": 1.4042975902557373, "direction": "pushes toward ATTACK"}, {"feature": "state", "value": -2.360154675645867, "shap_contribution": -0.9427337050437927, "direction": "pushes toward BENIGN"}, {"feature": "dload", "value": -0.36967960668082306, "shap_contribution": 0.7434254884719849, "direction": "pushes toward ATTACK"}, {"feature": "smean", "value": 2.8999397639989413, "shap_contribution": 0.5884298086166382, "direction": "pushes toward ATTACK"}, {"feature": "sbytes", "value": -0.054178689620489696, "shap_contribution": 0.40098682045936584, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 18, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "sbytes", "value": -0.061828598770638545, "shap_contribution": 0.7214362621307373, "direction": "pushes toward ATTACK"}, {"feature": "ct_src_dport_ltm", "value": 0.4325508973401267, "shap_contribution": -0.3856044113636017, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6840869981992524, "shap_contribution": -0.3230832517147064, "direction": "pushes toward BENIGN"}, {"feature": "sloss", "value": -0.09631932967076755, "shap_contribution": 0.2953920066356659, "direction": "pushes toward ATTACK"}, {"feature": "dload", "value": -0.37049294948818096, "shap_contribution": 0.2934055030345917, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 20, "true_label": "attack", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dbytes", "value": -0.11322336214321442, "shap_contribution": 1.2765430212020874, "direction": "pushes toward ATTACK"}, {"feature": "service", "value": 1.132207327457799, "shap_contribution": 0.7829228043556213, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": 0.8053575020104168, "shap_contribution": 0.7274742722511292, "direction": "pushes toward ATTACK"}, {"feature": "dmean", "value": 0.38618175609710503, "shap_contribution": 0.5504151582717896, "direction": "pushes toward ATTACK"}, {"feature": "tcprtt", "value": 1.6490918919024826, "shap_contribution": 0.4807031750679016, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 1, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dload", "value": -0.1620769217369034, "shap_contribution": -3.9886741638183594, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6815472993003358, "shap_contribution": -1.1416206359863281, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.5967500774491227, "shap_contribution": -1.0700322389602661, "direction": "pushes toward BENIGN"}, {"feature": "dmean", "value": -0.3808601677118881, "shap_contribution": -0.5059712529182434, "direction": "pushes toward BENIGN"}, {"feature": "ct_src_dport_ltm", "value": 1.1370726112453633, "shap_contribution": -0.4054471552371979, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 4, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dload", "value": 1.54939676552587, "shap_contribution": -4.360341548919678, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.5942965746284441, "shap_contribution": -1.4880318641662598, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6811424199054517, "shap_contribution": -1.3061225414276123, "direction": "pushes toward BENIGN"}, {"feature": "tcprtt", "value": -0.6892345792056597, "shap_contribution": -0.7340865135192871, "direction": "pushes toward BENIGN"}, {"feature": "dpkts", "value": 0.21578704592488512, "shap_contribution": -0.5781358480453491, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 6, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "state", "value": -2.360154675645867, "shap_contribution": -2.873600721359253, "direction": "pushes toward BENIGN"}, {"feature": "djit", "value": -0.1869661234732295, "shap_contribution": -0.6805331707000732, "direction": "pushes toward BENIGN"}, {"feature": "dload", "value": -0.3704289604361573, "shap_contribution": -0.6392168402671814, "direction": "pushes toward BENIGN"}, {"feature": "smean", "value": -0.05611736633061334, "shap_contribution": -0.5534037947654724, "direction": "pushes toward BENIGN"}, {"feature": "service", "value": -0.6700082952947668, "shap_contribution": -0.45710790157318115, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 8, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "service", "value": -0.6700082952947668, "shap_contribution": -0.5295606851577759, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": 1.5490996118547133, "shap_contribution": 0.4209589660167694, "direction": "pushes toward ATTACK"}, {"feature": "sbytes", "value": -0.05781775446492871, "shap_contribution": -0.3735698163509369, "direction": "pushes toward BENIGN"}, {"feature": "smean", "value": -0.308367574785402, "shap_contribution": -0.2170531153678894, "direction": "pushes toward BENIGN"}, {"feature": "sjit", "value": 0.09108807024104439, "shap_contribution": 0.1622893065214157, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 9, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dload", "value": 1.4044931595035748, "shap_contribution": -4.460285663604736, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.681602510297334, "shap_contribution": -1.3932896852493286, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.5945897609576675, "shap_contribution": -1.301522135734558, "direction": "pushes toward BENIGN"}, {"feature": "tcprtt", "value": -0.6896361197426267, "shap_contribution": -0.5497071146965027, "direction": "pushes toward BENIGN"}, {"feature": "dpkts", "value": 0.30135384050733305, "shap_contribution": -0.5132510662078857, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 10, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "state", "value": -2.360154675645867, "shap_contribution": -2.4300711154937744, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.6039717091217292, "shap_contribution": -0.6783074140548706, "direction": "pushes toward BENIGN"}, {"feature": "dload", "value": -0.3518511795069934, "shap_contribution": -0.6738598942756653, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6840869981992524, "shap_contribution": -0.6531013250350952, "direction": "pushes toward BENIGN"}, {"feature": "dbytes", "value": -0.13290922516790085, "shap_contribution": -0.3813692033290863, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 12, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "ackdat", "value": 1.7118061165823422, "shap_contribution": 0.5385798811912537, "direction": "pushes toward ATTACK"}, {"feature": "dloss", "value": -0.14217429382524038, "shap_contribution": 0.3638296127319336, "direction": "pushes toward ATTACK"}, {"feature": "synack", "value": 0.7864546947615342, "shap_contribution": 0.28018295764923096, "direction": "pushes toward ATTACK"}, {"feature": "dmean", "value": -0.38411034535514654, "shap_contribution": 0.255075603723526, "direction": "pushes toward ATTACK"}, {"feature": "tcprtt", "value": 1.3139605505039655, "shap_contribution": 0.22863511741161346, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 13, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "smean", "value": -0.5212036881691299, "shap_contribution": -0.7965243458747864, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6840869981992524, "shap_contribution": -0.698207676410675, "direction": "pushes toward BENIGN"}, {"feature": "state", "value": 3.886240068188503, "shap_contribution": -0.5419449806213379, "direction": "pushes toward BENIGN"}, {"feature": "sloss", "value": -0.061557540893315915, "shap_contribution": -0.40135785937309265, "direction": "pushes toward BENIGN"}, {"feature": "rate", "value": -0.24439772480945346, "shap_contribution": -0.3870294690132141, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 14, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dload", "value": -0.01564893873566452, "shap_contribution": -3.4775941371917725, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6817313355106502, "shap_contribution": -1.4552414417266846, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.5967346469442397, "shap_contribution": -1.3568096160888672, "direction": "pushes toward BENIGN"}, {"feature": "tcprtt", "value": -0.6909685047345616, "shap_contribution": -0.4920250475406647, "direction": "pushes toward BENIGN"}, {"feature": "dpkts", "value": 1.5563334943832359, "shap_contribution": -0.40993353724479675, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 16, "true_label": "benign", "base_value": 5.01622271258384e-05, "top_5_contributing_features": [{"feature": "dload", "value": 3.9831959813845494, "shap_contribution": -4.70579195022583, "direction": "pushes toward BENIGN"}, {"feature": "ackdat", "value": -0.6817497389977778, "shap_contribution": -1.3401790857315063, "direction": "pushes toward BENIGN"}, {"feature": "synack", "value": -0.5955156110108901, "shap_contribution": -1.318688154220581, "direction": "pushes toward BENIGN"}, {"feature": "dpkts", "value": 0.05891458919039726, "shap_contribution": -0.4802635610103607, "direction": "pushes toward BENIGN"}, {"feature": "tcprtt", "value": -0.6902566825355391, "shap_contribution": -0.4504639506340027, "direction": "pushes toward BENIGN"}]}], "cicids": [{"test_row_index": 10, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.6064742506939216, "shap_contribution": 2.97769832611084, "direction": "pushes toward ATTACK"}, {"feature": "min_seg_size_forward", "value": 0.003028904185104119, "shap_contribution": 1.8819087743759155, "direction": "pushes toward ATTACK"}, {"feature": "Packet Length Variance", "value": -0.31441627688464097, "shap_contribution": 1.1153491735458374, "direction": "pushes toward ATTACK"}, {"feature": "Fwd Packet Length Max", "value": -0.3057683342289128, "shap_contribution": 0.9699973464012146, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.10771243771387057, "shap_contribution": -0.912983238697052, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 13, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 2.313546895980835, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.22324996665839156, "shap_contribution": 1.8361443281173706, "direction": "pushes toward ATTACK"}, {"feature": "FIN Flag Count", "value": 5.495470040137495, "shap_contribution": 1.5984411239624023, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.1433674097061157, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.5977925526116428, "shap_contribution": 1.0658749341964722, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 14, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.6064742506939216, "shap_contribution": 2.1099894046783447, "direction": "pushes toward ATTACK"}, {"feature": "min_seg_size_forward", "value": 0.003028904185104119, "shap_contribution": 1.4603641033172607, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45714790810878564, "shap_contribution": 1.1879987716674805, "direction": "pushes toward ATTACK"}, {"feature": "Packet Length Variance", "value": -0.31441627688464097, "shap_contribution": 1.0608144998550415, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.24961197498154686, "shap_contribution": -0.9379265904426575, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 28, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Bwd Packet Length Std", "value": 4.579599265842429, "shap_contribution": 7.801335334777832, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.22392303921132317, "shap_contribution": 1.562661051750183, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Packet Length Mean", "value": 3.1298207068491966, "shap_contribution": 1.3929094076156616, "direction": "pushes toward ATTACK"}, {"feature": "Packet Length Variance", "value": 6.136395010028079, "shap_contribution": 0.49237117171287537, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 0.4322695732116699, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 30, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Bwd Packet Length Std", "value": 3.412242057651446, "shap_contribution": 8.086156845092773, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.22324996665839156, "shap_contribution": 1.8025847673416138, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Packet Length Mean", "value": 2.5152391494106663, "shap_contribution": 1.3069261312484741, "direction": "pushes toward ATTACK"}, {"feature": "Idle Min", "value": 2.3278613130837376, "shap_contribution": 0.5915597081184387, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 0.5891501903533936, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 39, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.6006864519724024, "shap_contribution": 2.9614672660827637, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": 2.071145241795973, "shap_contribution": -1.963388204574585, "direction": "pushes toward BENIGN"}, {"feature": "PSH Flag Count", "value": 1.535631870037926, "shap_contribution": 0.9268943071365356, "direction": "pushes toward ATTACK"}, {"feature": "Fwd Packet Length Max", "value": -0.3031254105312531, "shap_contribution": 0.8336136937141418, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Header Length", "value": 0.0018464298146363127, "shap_contribution": 0.7779107093811035, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 44, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.5934517035705035, "shap_contribution": 3.1476588249206543, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 1.5103060007095337, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -0.9803416728973389, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": -0.2978395631359336, "shap_contribution": 0.9707576632499695, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_forward", "value": -0.48036179521879235, "shap_contribution": 0.9627324342727661, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 47, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Bwd Packet Length Std", "value": 2.0470205869143574, "shap_contribution": 7.634074687957764, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.22324996665839156, "shap_contribution": 1.859615683555603, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Packet Length Mean", "value": 2.5152391494106663, "shap_contribution": 1.2899301052093506, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 0.7188090682029724, "direction": "pushes toward ATTACK"}, {"feature": "Idle Min", "value": 3.117240993091016, "shap_contribution": 0.6388615965843201, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 48, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.5943198733787314, "shap_contribution": 3.4219117164611816, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.45299359627113356, "shap_contribution": 1.53059720993042, "direction": "pushes toward ATTACK"}, {"feature": "Fwd Packet Length Max", "value": -0.2978395631359336, "shap_contribution": 0.9677442312240601, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_forward", "value": -0.48036179521879235, "shap_contribution": 0.9642118215560913, "direction": "pushes toward ATTACK"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -0.9454477429389954, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 51, "true_label": "attack", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Average Packet Size", "value": -0.6006864519724024, "shap_contribution": 2.952504873275757, "direction": "pushes toward ATTACK"}, {"feature": "Destination Port", "value": -0.3094857860818599, "shap_contribution": -1.141455054283142, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": -0.3031254105312531, "shap_contribution": 0.8758444786071777, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Packets/s", "value": 0.11346776554210525, "shap_contribution": 0.805801272392273, "direction": "pushes toward ATTACK"}, {"feature": "Bwd Header Length", "value": 0.0018464298146363127, "shap_contribution": 0.7854969501495361, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 0, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": -0.4979479943551152, "shap_contribution": -2.338444232940674, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.628612995147705, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.459608858135372, "shap_contribution": -1.6253753900527954, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.506631851196289, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Min", "value": 0.2513244580927383, "shap_contribution": -1.153757095336914, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 1, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": -0.4979479943551152, "shap_contribution": -2.174804210662842, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.6725705862045288, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.4364576632492952, "shap_contribution": -1.5944275856018066, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.4818271398544312, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Min", "value": 0.2231663038258935, "shap_contribution": -1.1046818494796753, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 2, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": -0.4979479943551152, "shap_contribution": -2.349839687347412, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.6406362056732178, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.36772755343125474, "shap_contribution": -1.5576826333999634, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.4973868131637573, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": -0.2581957076710377, "shap_contribution": -1.0969183444976807, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 3, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": -0.4979479943551152, "shap_contribution": -2.361392021179199, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.6176389455795288, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.3337242359423295, "shap_contribution": -1.6123507022857666, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.5085474252700806, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Min", "value": 0.7581712348959441, "shap_contribution": -1.152866244316101, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 4, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Fwd Packet Length Std", "value": -0.24401310384714275, "shap_contribution": -1.8425085544586182, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_forward", "value": -0.4816619422366528, "shap_contribution": -1.8128082752227783, "direction": "pushes toward BENIGN"}, {"feature": "Destination Port", "value": -0.4367444525010766, "shap_contribution": -1.4203473329544067, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.0427491664886475, "direction": "pushes toward BENIGN"}, {"feature": "Packet Length Variance", "value": -0.3144137810323637, "shap_contribution": 0.7956593036651611, "direction": "pushes toward ATTACK"}]}, {"test_row_index": 5, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Destination Port", "value": -0.4339047963082511, "shap_contribution": -2.5268261432647705, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": 0.522418547335226, "shap_contribution": -1.0597156286239624, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": 0.3021041162328243, "shap_contribution": -0.8084049224853516, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": 0.7508407047487421, "shap_contribution": -0.7682676315307617, "direction": "pushes toward BENIGN"}, {"feature": "Active Min", "value": 0.049079039727712, "shap_contribution": -0.6511291861534119, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 6, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Destination Port", "value": 1.4166044893496965, "shap_contribution": -2.4272570610046387, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.2071036100387573, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.5495608965893365, "shap_contribution": -1.1883537769317627, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.24961197498154686, "shap_contribution": -1.098787546157837, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": -0.26480301691518704, "shap_contribution": -0.9857732057571411, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 7, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": 3.9866012141976217, "shap_contribution": -2.4529073238372803, "direction": "pushes toward BENIGN"}, {"feature": "Destination Port", "value": -0.4339047963082511, "shap_contribution": -2.1751887798309326, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.14057422140662362, "shap_contribution": -1.5782629251480103, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": 0.2186975644378969, "shap_contribution": -1.0713961124420166, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": 0.20828032496590398, "shap_contribution": -0.9415280818939209, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 8, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Init_Win_bytes_forward", "value": -0.4979479943551152, "shap_contribution": -2.0710642337799072, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": -0.4274844551628614, "shap_contribution": -1.6782622337341309, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.2497241537403688, "shap_contribution": -1.5194913148880005, "direction": "pushes toward BENIGN"}, {"feature": "Average Packet Size", "value": -0.32648948754043045, "shap_contribution": -1.5167489051818848, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Min", "value": 1.2509389345657274, "shap_contribution": -1.0493271350860596, "direction": "pushes toward BENIGN"}]}, {"test_row_index": 9, "true_label": "benign", "base_value": -0.010749105364084244, "top_5_contributing_features": [{"feature": "Destination Port", "value": -0.4339047963082511, "shap_contribution": -2.166534423828125, "direction": "pushes toward BENIGN"}, {"feature": "Init_Win_bytes_backward", "value": -0.13967679133604813, "shap_contribution": -1.6982991695404053, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Std", "value": 0.16501111700403592, "shap_contribution": -1.129846453666687, "direction": "pushes toward BENIGN"}, {"feature": "Fwd Packet Length Max", "value": 0.25321002782611934, "shap_contribution": -0.9280956387519836, "direction": "pushes toward BENIGN"}, {"feature": "Bwd Packet Length Mean", "value": -0.08024944732728526, "shap_contribution": -0.8403047323226929, "direction": "pushes toward BENIGN"}]}]};
+
+let currentDataset = "unsw";
+let currentIndex = 0;
+
+function renderList() {
+  const list = document.getElementById("incidentList");
+  list.innerHTML = "";
+  DATA[currentDataset].forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "incident-item" + (i === currentIndex ? " selected" : "");
+    div.innerHTML = `
+      <span>Row #${item.test_row_index}</span>
+      <span class="badge ${item.true_label}">${item.true_label.toUpperCase()}</span>
+    `;
+    div.onclick = () => { currentIndex = i; renderList(); renderDetail(); };
+    list.appendChild(div);
+  });
+}
+
+function renderDetail() {
+  const item = DATA[currentDataset][currentIndex];
+  const panel = document.getElementById("detailPanel");
+  const maxAbs = Math.max(...item.top_5_contributing_features.map(f => Math.abs(f.shap_contribution)));
+
+  let barsHtml = "";
+  item.top_5_contributing_features.forEach(f => {
+    const pct = (Math.abs(f.shap_contribution) / maxAbs) * 48;
+    const isPos = f.shap_contribution > 0;
+    barsHtml += `
+      <div class="bar-row">
+        <div class="bar-label-row">
+          <span class="bar-feature-name">${f.feature}</span>
+          <span class="bar-value">value = ${f.value.toFixed(3)}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-center-line"></div>
+          <div class="bar-fill ${isPos ? 'pos' : 'neg'}" style="width:${pct}%"></div>
+        </div>
+        <div class="contribution-text">${f.shap_contribution > 0 ? '+' : ''}${f.shap_contribution.toFixed(4)} — ${f.direction}</div>
+      </div>
+    `;
+  });
+
+  panel.innerHTML = `
+    <div class="verdict-row">
+      <span class="verdict-label ${item.true_label}">${item.true_label === 'attack' ? '⚠ THREAT DETECTED' : '✓ BENIGN TRAFFIC'}</span>
+    </div>
+    <div class="meta">Test row #${item.test_row_index} · Model base rate: ${item.base_value.toFixed(4)} · Dataset: ${currentDataset.toUpperCase()}</div>
+    <div class="section-label">Top 5 features driving this decision (SHAP)</div>
+    ${barsHtml}
+    <div class="explain-footer">
+      Red bars push the model toward flagging this as an attack; green bars push toward benign.
+      Bar length reflects the magnitude of that feature's contribution to this specific prediction —
+      this is a local explanation for this one incident, not a global feature-importance ranking.
+    </div>
+  `;
+}
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentDataset = btn.dataset.dataset;
+    currentIndex = 0;
+    renderList();
+    renderDetail();
+  };
+});
+
+renderList();
+renderDetail();
+</script>
+
+</body>
+</html>
