@@ -8,19 +8,19 @@ MODEL_OUT = "ml-engine/models/lstm_autoencoder_unsw.pt"
 META_OUT = "ml-engine/models/lstm_ae_meta_unsw.joblib"
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-class LSTMAutoencoder(nn.Module):
-    def __init__(self, n_features, hidden_size=32, latent_size=8):
+class Autoencoder(nn.Module):
+    def __init__(self, n_features):
         super().__init__()
-        self.encoder_lstm = nn.LSTM(n_features, hidden_size, batch_first=True)
-        self.encoder_fc = nn.Linear(hidden_size, latent_size)
-        self.decoder_fc = nn.Linear(latent_size, hidden_size)
-        self.decoder_lstm = nn.LSTM(hidden_size, n_features, batch_first=True)
+        self.net = nn.Sequential(
+            nn.Linear(n_features, 32), nn.ReLU(),
+            nn.Linear(32, 16), nn.ReLU(),
+            nn.Linear(16, 8), nn.ReLU(),
+            nn.Linear(8, 16), nn.ReLU(),
+            nn.Linear(16, 32), nn.ReLU(),
+            nn.Linear(32, n_features)
+        )
     def forward(self, x):
-        _, (h_n, _) = self.encoder_lstm(x)
-        latent = self.encoder_fc(h_n[-1])
-        dec_in = self.decoder_fc(latent).unsqueeze(1)
-        out, _ = self.decoder_lstm(dec_in)
-        return out.squeeze(1)
+        return self.net(x)
 
 def main():
     print(f"Device: {device}")
@@ -31,13 +31,13 @@ def main():
     X_val = val_df.drop(columns=["Attack"]).values.astype(np.float32)
 
     n_features = benign.shape[1]
-    X_train_t = torch.tensor(benign).unsqueeze(1).to(device)
-    X_val_t = torch.tensor(X_val).unsqueeze(1).to(device)
+    X_train_t = torch.tensor(benign).to(device)
+    X_val_t = torch.tensor(X_val).to(device)
 
-    model = LSTMAutoencoder(n_features).to(device)
+    model = Autoencoder(n_features).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     loss_fn = nn.MSELoss()
-    batch_size, n_epochs, n = 512, 20, X_train_t.shape[0]
+    batch_size, n_epochs, n = 512, 30, X_train_t.shape[0]
 
     for epoch in range(n_epochs):
         model.train()
@@ -48,16 +48,17 @@ def main():
             batch = X_train_t[idx]
             optimizer.zero_grad()
             recon = model(batch)
-            loss = loss_fn(recon, batch.squeeze(1))
+            loss = loss_fn(recon, batch)
             loss.backward()
             optimizer.step()
             total_loss += loss.item() * batch.size(0)
-        print(f"Epoch {epoch+1}/{n_epochs} MSE={total_loss/n:.5f}")
+        if epoch % 5 == 0:
+            print(f"Epoch {epoch}/{n_epochs} MSE={total_loss/n:.5f}")
 
     model.eval()
     with torch.no_grad():
-        train_err = torch.mean((model(X_train_t) - X_train_t.squeeze(1))**2, dim=1).cpu().numpy()
-        val_err = torch.mean((model(X_val_t) - X_val_t.squeeze(1))**2, dim=1).cpu().numpy()
+        train_err = torch.mean((model(X_train_t) - X_train_t)**2, dim=1).cpu().numpy()
+        val_err = torch.mean((model(X_val_t) - X_val_t)**2, dim=1).cpu().numpy()
 
     threshold = float(np.percentile(train_err, 95))
     preds = (val_err > threshold).astype(int)
