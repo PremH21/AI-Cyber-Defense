@@ -1,0 +1,106 @@
+{
+  "UNSW-NB15": {
+    "Normal": {
+      "slide_category": "N/A (benign)",
+      "notes": "Not an attack; baseline traffic."
+    },
+    "Generic": {
+      "slide_category": "N/A (crypto probe, no clean match)",
+      "notes": "Attacks against block ciphers regardless of structure \u2014 doesn't correspond to any single slide category. Closest conceptually to APT reconnaissance tooling."
+    },
+    "Exploits": {
+      "slide_category": "APT",
+      "notes": "Exploitation of a known vulnerability \u2014 mapped to APT/intrusion since UNSW's Exploits class covers post-recon compromise attempts."
+    },
+    "Fuzzers": {
+      "slide_category": "Zero-Day",
+      "notes": "Fuzzing tools probing for unknown vulnerabilities \u2014 closest conceptual match to zero-day discovery activity."
+    },
+    "DoS": {
+      "slide_category": "DDoS",
+      "notes": "Denial of service \u2014 direct match (UNSW's DoS includes both single- and multi-source floods)."
+    },
+    "Reconnaissance": {
+      "slide_category": "Lateral Movement",
+      "notes": "Scanning/probing prior to compromise \u2014 precursor to lateral movement in the kill chain."
+    },
+    "Analysis": {
+      "slide_category": "Phishing",
+      "notes": "Port scan + spam + HTML file penetration attacks \u2014 closest match is web/phishing-adjacent activity."
+    },
+    "Backdoor": {
+      "slide_category": "C2 Communication",
+      "notes": "Backdoor access techniques \u2014 direct conceptual match to C2 channels."
+    },
+    "Shellcode": {
+      "slide_category": "Ransomware",
+      "notes": "Small malicious code payload delivery \u2014 used as the closest stand-in for ransomware payload delivery, since UNSW predates modern ransomware-specific labeling."
+    },
+    "Worms": {
+      "slide_category": "Insider Threats",
+      "notes": "Self-replicating malware \u2014 weak match; included in RL engine as malware_backdoor rather than insider. Flagged as the least clean mapping in this table."
+    }
+  },
+  "CIC-IDS-2017": {
+    "BENIGN": {
+      "slide_category": "N/A (benign)",
+      "notes": "Not an attack; baseline traffic."
+    },
+    "DDoS": {
+      "slide_category": "DDoS",
+      "notes": "Direct match."
+    },
+    "DoS Hulk": {
+      "slide_category": "DDoS",
+      "notes": "Direct match (single-source DoS tool)."
+    },
+    "DoS GoldenEye": {
+      "slide_category": "DDoS",
+      "notes": "Direct match."
+    },
+    "DoS Slowhttptest": {
+      "slide_category": "DDoS",
+      "notes": "Direct match (slow-rate DoS)."
+    },
+    "DoS slowloris": {
+      "slide_category": "DDoS",
+      "notes": "Direct match (slow-rate DoS)."
+    },
+    "PortScan": {
+      "slide_category": "Lateral Movement",
+      "notes": "Reconnaissance/scanning \u2014 precursor to lateral movement."
+    },
+    "FTP-Patator": {
+      "slide_category": "Insider Threats",
+      "notes": "Credential brute-force \u2014 mapped to insider/credential-abuse category (matches RL engine's credential_attack threat_type)."
+    },
+    "SSH-Patator": {
+      "slide_category": "Insider Threats",
+      "notes": "Credential brute-force \u2014 same rationale as FTP-Patator."
+    },
+    "Bot": {
+      "slide_category": "C2 Communication",
+      "notes": "Botnet client traffic \u2014 direct match to C2."
+    },
+    "Infiltration": {
+      "slide_category": "APT",
+      "notes": "Multi-stage internal compromise \u2014 direct match to APT-style long-dwell intrusion."
+    },
+    "Heartbleed": {
+      "slide_category": "Zero-Day",
+      "notes": "CVE-2014-0160 exploitation \u2014 direct match, this is a canonical zero-day/known-CVE case."
+    },
+    "Web Attack \ufffd Brute Force": {
+      "slide_category": "Phishing",
+      "notes": "Web application attack \u2014 grouped under phishing/web-vector category."
+    },
+    "Web Attack \ufffd Sql Injection": {
+      "slide_category": "Phishing",
+      "notes": "Web application attack \u2014 same rationale."
+    },
+    "Web Attack \ufffd XSS": {
+      "slide_category": "Phishing",
+      "notes": "Web application attack \u2014 same rationale."
+    }
+  }
+}
