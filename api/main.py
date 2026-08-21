@@ -253,3 +253,68 @@ def honeypot_alert(alert: HoneypotAlert):
 
     print(f"HONEYPOT TRIGGERED: {alert.decoy_file} was {alert.event_type} — action: {action}")
     return record
+
+
+class LiveFlowRequest(BaseModel):
+    src_ip: str
+    dst_ip: str
+    src_port: int
+    dst_port: int
+    protocol: str
+    ip_version: str
+    duration_sec: float
+    packet_count: int
+    total_bytes: int
+    avg_packet_size: float
+    packets_per_sec: float
+
+
+@app.post("/ingest_live")
+def ingest_live(flow: LiveFlowRequest):
+    """
+    Real-time endpoint for the live packet-capture agent. Uses the reduced
+    7-feature live detector (trained on the same statistical signal, but
+    only features genuinely computable from live traffic without full-flow
+    retrospective analysis).
+    """
+    if "live_detector" not in MODELS:
+        MODELS["live_detector"] = joblib.load("ml-engine/models/live_detector_cicids.joblib")
+
+    features = pd.DataFrame([{
+        "duration": flow.duration_sec,
+        "total_packets": flow.packet_count,
+        "total_bytes": flow.total_bytes,
+        "packets_per_sec": flow.packets_per_sec,
+        "avg_packet_size": flow.avg_packet_size,
+        "dest_port": flow.dst_port,
+        "protocol_tcp": 1 if flow.protocol == "TCP" else 0,
+    }])
+
+    t0 = time.time()
+    proba = float(MODELS["live_detector"].predict_proba(features)[0][1])
+    pred = int(proba >= 0.5)
+    detect_ms = (time.time() - t0) * 1000
+
+    severity = min(10, max(1, int(proba * 10)))
+    action = get_action(severity, "medium")  # live traffic: default to medium criticality
+
+    record = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "source": "live_capture",
+        "src_ip": flow.src_ip, "dst_ip": flow.dst_ip,
+        "src_port": flow.src_port, "dst_port": flow.dst_port,
+        "protocol": flow.protocol, "ip_version": flow.ip_version,
+        "predicted_label": "attack" if pred == 1 else "benign",
+        "confidence": round(proba, 4),
+        "severity": severity,
+        "action_taken": action,
+        "detection_latency_ms": round(detect_ms, 3),
+    }
+
+    if DB is not None:
+        try:
+            DB[INCIDENTS_COLLECTION].insert_one(dict(record))
+        except Exception as e:
+            print(f"Mongo insert failed: {e}")
+
+    return record
