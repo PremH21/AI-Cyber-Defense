@@ -13,3 +13,5 @@ response-engine/models/
 response-engine/demo_data/
 prediction/models/
 lineage/output/tlsh_hashes.json
+response-engine/clean_backup/
+response-engine/protected_files/*.txt
