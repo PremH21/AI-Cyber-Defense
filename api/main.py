@@ -213,3 +213,43 @@ def get_stats():
             "accuracy": round(correct / total, 4) if total else None,
             "attacks_detected": attacks,
             "avg_detection_latency_ms": round(avg_latency, 3) if avg_latency else None}
+
+
+class HoneypotAlert(BaseModel):
+    decoy_file: str
+    event_type: str  # "accessed" | "modified" | "deleted"
+
+
+@app.post("/honeypot_alert")
+def honeypot_alert(alert: HoneypotAlert):
+    """
+    Honeypot events are zero-false-positive by design — no legitimate process
+    should ever touch a decoy file, so any event here is treated as a
+    confirmed attack at maximum severity, routed straight to the RL policy
+    for a real containment action.
+    """
+    severity = 10
+    action = get_action(severity, "high")
+
+    record = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "source": "honeypot",
+        "decoy_file": alert.decoy_file,
+        "event_type": alert.event_type,
+        "true_label": "attack",
+        "predicted_label": "attack",
+        "severity": severity,
+        "asset_criticality": "high",
+        "action_taken": action,
+        "correct": True,
+        "detection_latency_ms": 0.0,
+    }
+
+    if DB is not None:
+        try:
+            DB[INCIDENTS_COLLECTION].insert_one(dict(record))
+        except Exception as e:
+            print(f"Mongo insert failed: {e}")
+
+    print(f"HONEYPOT TRIGGERED: {alert.decoy_file} was {alert.event_type} — action: {action}")
+    return record
