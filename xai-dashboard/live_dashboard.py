@@ -63,7 +63,7 @@ while True:
                     return ["background-color: #fff3cd"] * len(row)
                 return [""] * len(row)
 
-            st.dataframe(df_display.style.apply(highlight_row, axis=1), use_container_width=True, height=500)
+            st.dataframe(df_display.style.apply(highlight_row, axis=1), width='stretch', height=500)
         else:
             st.info("No incidents yet — start the simulator: python api/simulator.py")
 
