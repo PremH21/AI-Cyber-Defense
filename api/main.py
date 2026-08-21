@@ -28,7 +28,7 @@ MODELS = {}
 MONGO_CLIENT = None
 DB = None
 
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
 DB_NAME = "cyberdefense"
 INCIDENTS_COLLECTION = "incidents"
 
