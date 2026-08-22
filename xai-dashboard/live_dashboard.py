@@ -42,7 +42,7 @@ while True:
 
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Processed", stats.get("total_incidents_processed", 0))
-        col2.metric("Live Accuracy", f"{stats.get('accuracy', 0):.1%}" if stats.get("accuracy") else "—")
+        col2.metric("Live Accuracy", f"{stats.get('accuracy', 0):.1%}" if stats.get("accuracy") else "N/A", help="No ground-truth labels exist for live-captured traffic - accuracy only applies to labeled test-set replay")
         col3.metric("Attacks Detected", stats.get("attacks_detected", 0))
         col4.metric("Avg Latency", f"{stats.get('avg_detection_latency_ms', 0):.1f}ms")
 
