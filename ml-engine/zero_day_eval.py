@@ -24,7 +24,7 @@ from sklearn.preprocessing import StandardScaler
 from train_live_multiclass import load
 
 OUT = "ml-engine/models"
-HOLDOUTS = ["DoS Hulk", "PortScan", "DDoS", "FTP-Patator", "Bot", "Web Attack - Brute Force"]
+HOLDOUTS = ["DoS Hulk", "PortScan", "DDoS", "FTP-Patator", "Bot", "Web Attack"]
 BENIGN_CAP = 300_000
 EVAL_CAP = 100_000
 FPR_TARGET = 0.01  # thresholds set so ~1% of benign validation flows are flagged

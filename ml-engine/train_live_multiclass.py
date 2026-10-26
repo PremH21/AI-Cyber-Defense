@@ -58,6 +58,8 @@ def load():
     df["Label"] = (
         df["Label"].astype(str).str.strip().apply(lambda s: re.sub(r"[^\x00-\x7F]+", "-", s))
     )
+    # HTTP-payload attacks (brute force / XSS / SQLi) are indistinguishable at flow level -> one class
+    df["Label"] = df["Label"].where(~df["Label"].str.startswith("Web Attack"), "Web Attack")
     df = df.rename(columns=FEATURES)
     return df
 
