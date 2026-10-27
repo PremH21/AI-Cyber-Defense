@@ -1,0 +1,24 @@
+{
+  "iso_threshold": -0.6338326196537306,
+  "ae_threshold": 0.34645230230689605,
+  "features": [
+    "duration_us",
+    "fwd_packets",
+    "bwd_packets",
+    "fwd_bytes",
+    "bwd_bytes",
+    "fwd_pkt_len_mean",
+    "bwd_pkt_len_mean",
+    "avg_packet_size",
+    "bytes_per_sec",
+    "packets_per_sec",
+    "dst_port",
+    "syn_count",
+    "fin_count",
+    "rst_count",
+    "psh_count",
+    "ack_count"
+  ],
+  "benign_fpr_target": 0.01,
+  "transform": "log1p(clip(x,0)) then StandardScaler"
+}

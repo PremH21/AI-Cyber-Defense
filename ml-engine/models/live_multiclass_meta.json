@@ -1,0 +1,35 @@
+{
+  "classes": [
+    "BENIGN",
+    "Bot",
+    "DDoS",
+    "DoS GoldenEye",
+    "DoS Hulk",
+    "DoS Slowhttptest",
+    "DoS slowloris",
+    "FTP-Patator",
+    "Heartbleed",
+    "Infiltration",
+    "PortScan",
+    "SSH-Patator",
+    "Web Attack"
+  ],
+  "features": [
+    "duration_us",
+    "fwd_packets",
+    "bwd_packets",
+    "fwd_bytes",
+    "bwd_bytes",
+    "fwd_pkt_len_mean",
+    "bwd_pkt_len_mean",
+    "avg_packet_size",
+    "bytes_per_sec",
+    "packets_per_sec",
+    "dst_port",
+    "syn_count",
+    "fin_count",
+    "rst_count",
+    "psh_count",
+    "ack_count"
+  ]
+}

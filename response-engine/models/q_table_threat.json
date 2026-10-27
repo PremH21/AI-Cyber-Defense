@@ -1,0 +1,485 @@
+{
+  "dos_ddos|8|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -3.1999999999999336,
+    "virtual_patch": -6.399999999993428,
+    "alert_only": -9.599999999999982,
+    "rollback": -0.499999999999996
+  },
+  "web_attack|5|low": {
+    "block": -0.49999999999993755,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -1.999999999999943,
+    "alert_only": -3.999999999999826,
+    "rollback": -0.9999999999998097
+  },
+  "dos_ddos|8|high": {
+    "block": 10.999999999999993,
+    "quarantine": -7.039999999997959,
+    "virtual_patch": -14.079999999996694,
+    "alert_only": -21.1199999999994,
+    "rollback": -1.0999999999999792
+  },
+  "benign|0|high": {
+    "block": -13.199999999999992,
+    "quarantine": -8.799999999999994,
+    "virtual_patch": -4.399999999999997,
+    "alert_only": 0.9999999999999996,
+    "rollback": -17.599999999999987
+  },
+  "infiltration|8|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -3.1999999999999176,
+    "virtual_patch": -6.399999999999903,
+    "alert_only": -9.59999999999988,
+    "rollback": -0.4999999999999939
+  },
+  "benign|1|low": {
+    "block": -5.999999999995009,
+    "quarantine": -3.9999999999985674,
+    "virtual_patch": -1.9999999999999538,
+    "alert_only": 0.9999999999999996,
+    "rollback": -7.99999999999957
+  },
+  "credential_attack|6|low": {
+    "block": -0.49999999999994943,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -2.3999999999994928,
+    "alert_only": -4.799999999999087,
+    "rollback": -0.9999999999998989
+  },
+  "malware_backdoor|9|high": {
+    "block": -7.919999999997704,
+    "quarantine": -15.83999999999856,
+    "virtual_patch": -23.75999999999806,
+    "alert_only": -31.679999999999914,
+    "rollback": 10.999999999999993
+  },
+  "botnet|9|high": {
+    "block": -7.919999999999655,
+    "quarantine": -15.839999999996282,
+    "virtual_patch": -23.759999999998726,
+    "alert_only": -31.679999999989796,
+    "rollback": 10.999999999999993
+  },
+  "malware_backdoor|7|high": {
+    "block": 10.999999999999993,
+    "quarantine": -6.159999999999632,
+    "virtual_patch": -12.319999999985942,
+    "alert_only": -18.479999999995663,
+    "rollback": -1.0999999999997907
+  },
+  "benign|1|high": {
+    "block": -13.19999999999774,
+    "quarantine": -8.799999999997702,
+    "virtual_patch": -4.399999999999995,
+    "alert_only": 0.9999999999999996,
+    "rollback": -17.59999999999665
+  },
+  "dos_ddos|7|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -2.7999999999994674,
+    "virtual_patch": -5.599999999997772,
+    "alert_only": -8.399999999998702,
+    "rollback": -0.4999999999999989
+  },
+  "credential_attack|5|medium": {
+    "block": -0.7499999999998961,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -2.9999999999999587,
+    "alert_only": -5.999999999999887,
+    "rollback": -1.4999999999999936
+  },
+  "recon_scan|3|medium": {
+    "block": -1.4999999999999105,
+    "quarantine": -0.7499999999996317,
+    "virtual_patch": 7.4999999999999964,
+    "alert_only": -1.7999999999999625,
+    "rollback": -2.2499999999998783
+  },
+  "dos_ddos|7|high": {
+    "block": 10.999999999999993,
+    "quarantine": -6.15999999999755,
+    "virtual_patch": -12.31999999999996,
+    "alert_only": -18.479999999997155,
+    "rollback": -1.0999999999950623
+  },
+  "web_attack|6|low": {
+    "block": -0.4999999999992957,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -2.39999999999963,
+    "alert_only": -4.799999999999918,
+    "rollback": -0.9999999999999682
+  },
+  "web_attack|6|high": {
+    "block": -1.099999999999919,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -5.279999999999611,
+    "alert_only": -10.559999999994812,
+    "rollback": -2.199999999999882
+  },
+  "credential_attack|5|low": {
+    "block": -0.4999999999999945,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -1.9999999999997977,
+    "alert_only": -3.999999999999992,
+    "rollback": -0.9999999999999878
+  },
+  "malware_backdoor|8|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -3.1999999999998745,
+    "virtual_patch": -6.399999999999796,
+    "alert_only": -9.599999999999753,
+    "rollback": -0.49999999999998235
+  },
+  "botnet|8|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -3.1999999999999336,
+    "virtual_patch": -6.399999999996856,
+    "alert_only": -9.599999999999904,
+    "rollback": -0.49999999999995903
+  },
+  "credential_attack|5|high": {
+    "block": -1.099999999999333,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -4.3999999999999515,
+    "alert_only": -8.79999999999972,
+    "rollback": -2.1999999999997253
+  },
+  "infiltration|8|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.799999999999682,
+    "virtual_patch": -9.59999999999996,
+    "alert_only": -14.399999999999782,
+    "rollback": -0.7499999999998574
+  },
+  "botnet|7|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -2.799999999999982,
+    "virtual_patch": -5.59999999999996,
+    "alert_only": -8.39999999999963,
+    "rollback": -0.4999999999999907
+  },
+  "recon_scan|4|high": {
+    "block": -1.099999999999997,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -3.519999999999975,
+    "alert_only": -7.039999999999981,
+    "rollback": -2.1999999999999664
+  },
+  "dos_ddos|8|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.799999999999997,
+    "virtual_patch": -9.599999999995758,
+    "alert_only": -14.399999999999757,
+    "rollback": -0.7499999999999826
+  },
+  "credential_attack|7|high": {
+    "block": 10.999999999999993,
+    "quarantine": -6.159999999997277,
+    "virtual_patch": -12.31999999999992,
+    "alert_only": -18.479999999999194,
+    "rollback": -1.099999999999993
+  },
+  "malware_backdoor|9|low": {
+    "block": -3.5999999999993832,
+    "quarantine": -7.199999999999468,
+    "virtual_patch": -10.799999999998505,
+    "alert_only": -14.399999999998688,
+    "rollback": 4.9999999999999964
+  },
+  "recon_scan|3|high": {
+    "block": -2.199999999999978,
+    "quarantine": -1.0999999999999985,
+    "virtual_patch": 10.999999999999993,
+    "alert_only": -2.639999999999964,
+    "rollback": -3.2999999999994913
+  },
+  "web_attack|7|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -2.7999999999994083,
+    "virtual_patch": -5.599999999999628,
+    "alert_only": -8.399999999999823,
+    "rollback": -0.4999999999999939
+  },
+  "dos_ddos|6|low": {
+    "block": -0.4999999999999983,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -2.3999999999993737,
+    "alert_only": -4.799999999999926,
+    "rollback": -0.9999999999999565
+  },
+  "recon_scan|4|low": {
+    "block": -0.49999999999999556,
+    "quarantine": 4.9999999999999964,
+    "virtual_patch": -1.599999999999882,
+    "alert_only": -3.199999999998969,
+    "rollback": -0.9999999999998989
+  },
+  "recon_scan|2|medium": {
+    "block": -1.4999999999998637,
+    "quarantine": -0.7499999999999925,
+    "virtual_patch": 7.4999999999999964,
+    "alert_only": -1.1999999999999944,
+    "rollback": -2.249999999999953
+  },
+  "infiltration|10|low": {
+    "block": -3.999999999999636,
+    "quarantine": -7.9999999999999964,
+    "virtual_patch": -11.99999999999772,
+    "alert_only": -15.999999999988022,
+    "rollback": 4.9999999999999964
+  },
+  "credential_attack|7|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.199999999999012,
+    "virtual_patch": -8.399999999999856,
+    "alert_only": -12.599999999998584,
+    "rollback": -0.7499999999999065
+  },
+  "botnet|7|high": {
+    "block": 10.999999999999993,
+    "quarantine": -6.159999999993674,
+    "virtual_patch": -12.31999999999985,
+    "alert_only": -18.479999999999105,
+    "rollback": -1.099999999999947
+  },
+  "web_attack|7|high": {
+    "block": 10.999999999999993,
+    "quarantine": -6.159999999999669,
+    "virtual_patch": -12.31999999999985,
+    "alert_only": -18.479999999999688,
+    "rollback": -1.09999999999991
+  },
+  "benign|0|low": {
+    "block": -5.9999999999999964,
+    "quarantine": -3.9999999999999982,
+    "virtual_patch": -1.9999999999999991,
+    "alert_only": 0.9999999999999996,
+    "rollback": -7.9999999999999964
+  },
+  "malware_backdoor|7|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -2.799999999999878,
+    "virtual_patch": -5.59999999999995,
+    "alert_only": -8.39999999999997,
+    "rollback": -0.49999999999999506
+  },
+  "malware_backdoor|7|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.19999999999911,
+    "virtual_patch": -8.399999999999668,
+    "alert_only": -12.599999999995937,
+    "rollback": -0.7499999999993069
+  },
+  "botnet|9|low": {
+    "block": -3.5999999999996355,
+    "quarantine": -7.199999999999717,
+    "virtual_patch": -10.799999999999836,
+    "alert_only": -14.399999999999991,
+    "rollback": 4.9999999999999964
+  },
+  "recon_scan|4|medium": {
+    "block": -0.7499999999999065,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -2.399999999999989,
+    "alert_only": -4.799999999999768,
+    "rollback": -1.4999999999999651
+  },
+  "infiltration|9|medium": {
+    "block": -5.39999999999971,
+    "quarantine": -10.799999999997183,
+    "virtual_patch": -16.19999999999993,
+    "alert_only": -21.599999999999703,
+    "rollback": 7.4999999999999964
+  },
+  "recon_scan|3|low": {
+    "block": -0.9999999999999928,
+    "quarantine": -0.4999999999999804,
+    "virtual_patch": 4.9999999999999964,
+    "alert_only": -1.1999999999999795,
+    "rollback": -1.4999999999999771
+  },
+  "infiltration|9|low": {
+    "block": -3.599999999969592,
+    "quarantine": -7.199999999999569,
+    "virtual_patch": -10.799999999999937,
+    "alert_only": -14.399999999999588,
+    "rollback": 4.9999999999999964
+  },
+  "dos_ddos|6|medium": {
+    "block": -0.7499999999999974,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -3.5999999999999455,
+    "alert_only": -7.19999999999919,
+    "rollback": -1.49999999999999
+  },
+  "malware_backdoor|9|medium": {
+    "block": -5.399999999999327,
+    "quarantine": -10.799999999996523,
+    "virtual_patch": -16.19999999999978,
+    "alert_only": -21.59999999999967,
+    "rollback": 7.4999999999999964
+  },
+  "web_attack|6|medium": {
+    "block": -0.7499999999999991,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -3.5999999999995,
+    "alert_only": -7.1999999999995214,
+    "rollback": -1.4999999999999651
+  },
+  "botnet|8|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.799999999998873,
+    "virtual_patch": -9.599999999999904,
+    "alert_only": -14.399999999999302,
+    "rollback": -0.7499999999999637
+  },
+  "benign|0|medium": {
+    "block": -8.999999999999993,
+    "quarantine": -5.9999999999999964,
+    "virtual_patch": -2.9999999999999982,
+    "alert_only": 0.9999999999999996,
+    "rollback": -11.999999999999993
+  },
+  "dos_ddos|6|high": {
+    "block": -1.0999999999998304,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -5.279999999999975,
+    "alert_only": -10.559999999998192,
+    "rollback": -2.1999999999999664
+  },
+  "infiltration|10|high": {
+    "block": -8.799999999999944,
+    "quarantine": -17.599999999994893,
+    "virtual_patch": -26.399999999997842,
+    "alert_only": -35.199999999998624,
+    "rollback": 10.999999999999993
+  },
+  "recon_scan|2|high": {
+    "block": -2.1999999999999584,
+    "quarantine": -1.0999999999998626,
+    "virtual_patch": 10.999999999999993,
+    "alert_only": -1.7599999999998952,
+    "rollback": -3.299999999999998
+  },
+  "web_attack|5|high": {
+    "block": -1.0999999999999346,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -4.399999999999972,
+    "alert_only": -8.799999999999011,
+    "rollback": -2.1999999999999664
+  },
+  "infiltration|8|high": {
+    "block": 10.999999999999993,
+    "quarantine": -7.039999999999838,
+    "virtual_patch": -14.079999999999847,
+    "alert_only": -21.11999999999504,
+    "rollback": -1.0999999999998888
+  },
+  "recon_scan|2|low": {
+    "block": -0.9999999999999936,
+    "quarantine": -0.499999999999996,
+    "virtual_patch": 4.9999999999999964,
+    "alert_only": -0.7999999999999717,
+    "rollback": -1.499999999994546
+  },
+  "web_attack|5|medium": {
+    "block": -0.7499999999998574,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -2.9999999999999227,
+    "alert_only": -5.9999999999998455,
+    "rollback": -1.4999999999993372
+  },
+  "credential_attack|7|low": {
+    "block": 4.9999999999999964,
+    "quarantine": -2.7999999999994674,
+    "virtual_patch": -5.599999999999856,
+    "alert_only": -8.399999999998702,
+    "rollback": -0.4999999999999668
+  },
+  "credential_attack|6|high": {
+    "block": -1.099999999999985,
+    "quarantine": 10.999999999999993,
+    "virtual_patch": -5.279999999999096,
+    "alert_only": -10.559999999997519,
+    "rollback": -2.1999999999997777
+  },
+  "credential_attack|6|medium": {
+    "block": -0.7499999999998239,
+    "quarantine": 7.4999999999999964,
+    "virtual_patch": -3.5999999999999392,
+    "alert_only": -7.199999999999935,
+    "rollback": -1.4999999999999831
+  },
+  "dos_ddos|7|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.1999999999996165,
+    "virtual_patch": -8.399999999999954,
+    "alert_only": -12.599999999999843,
+    "rollback": -0.7499999999999956
+  },
+  "botnet|7|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.199999999995686,
+    "virtual_patch": -8.399999999996286,
+    "alert_only": -12.599999999998058,
+    "rollback": -0.7499999999999243
+  },
+  "web_attack|7|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.199999999999891,
+    "virtual_patch": -8.39999999999984,
+    "alert_only": -12.599999999999785,
+    "rollback": -0.7499999999999964
+  },
+  "malware_backdoor|8|medium": {
+    "block": 7.4999999999999964,
+    "quarantine": -4.799999999999965,
+    "virtual_patch": -9.599999999999582,
+    "alert_only": -14.39999999999973,
+    "rollback": -0.7499999999999386
+  },
+  "benign|1|medium": {
+    "block": -8.9999999999999,
+    "quarantine": -5.999999999999875,
+    "virtual_patch": -2.9999999999997273,
+    "alert_only": 0.9999999999999996,
+    "rollback": -11.999999999998337
+  },
+  "botnet|9|medium": {
+    "block": -5.399999999999909,
+    "quarantine": -10.799999999997947,
+    "virtual_patch": -16.199999999997747,
+    "alert_only": -21.599999999998037,
+    "rollback": 7.4999999999999964
+  },
+  "infiltration|9|high": {
+    "block": -7.919999999999655,
+    "quarantine": -15.839999999999947,
+    "virtual_patch": -23.759999999998254,
+    "alert_only": -31.67999999999919,
+    "rollback": 10.999999999999993
+  },
+  "malware_backdoor|8|high": {
+    "block": 10.999999999999993,
+    "quarantine": -7.039999999999838,
+    "virtual_patch": -14.0799999999996,
+    "alert_only": -21.119999999999713,
+    "rollback": -1.0999999999997907
+  },
+  "botnet|8|high": {
+    "block": 10.999999999999993,
+    "quarantine": -7.0399999999991225,
+    "virtual_patch": -14.079999999999641,
+    "alert_only": -21.119999999999937,
+    "rollback": -1.0999999999998764
+  },
+  "infiltration|10|medium": {
+    "block": -5.999999999999509,
+    "quarantine": -11.999999999999355,
+    "virtual_patch": -17.999999999996913,
+    "alert_only": -23.999999999993044,
+    "rollback": 7.4999999999999964
+  }
+}
