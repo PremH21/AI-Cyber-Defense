@@ -20,3 +20,6 @@ response-engine/protected_files/*.txt
 *.bak
 *.bak2
 *_old.py
+
+.env*
+*.bak

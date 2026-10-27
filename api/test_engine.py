@@ -10,7 +10,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from engine import DefenseEngine  # noqa: E402
+from engine import DefenseEngine, guard_action, is_weak_unsup  # noqa: E402
 
 eng = DefenseEngine()
 PASS, FAIL = [], []
@@ -100,6 +100,27 @@ print(json.dumps(sample, indent=2, default=str)[:1500])
 rl_used = eng.rl_states > 0
 print(f"\nRL policy states loaded: {eng.rl_states} -> {'OK' if rl_used else 'WARNING: actions come from fallback rule'}")
 (PASS if rl_used else FAIL).append("RL policy loaded")
+
+# anomaly-only evidence must never block
+cases = [
+    (("block", "rl_policy", ["isolation_forest+autoencoder"], 1.0), ("alert_only", "guard:unsup_only_cap")),
+    (("block", "rl_policy", ["isolation_forest+autoencoder"], 0.3), ("quarantine", "guard:unsup_only_cap")),
+    (("block", "rl_policy", ["supervised_xgboost"], 0.0), ("block", "rl_policy")),
+    (("block", "rl_policy", ["behavioural:arp_spoof", "isolation_forest+autoencoder"], 0.0), ("block", "rl_policy")),
+    (("quarantine", "rl_policy", ["isolation_forest+autoencoder"], 1.0), ("quarantine", "rl_policy")),
+]
+ok = all(guard_action(*a) == want for a, want in cases)
+print(f"\n=== Guard: unsupervised-only evidence never blocks -> {'OK' if ok else 'FAIL'}")
+(PASS if ok else FAIL).append("unsup-only guard")
+
+# weak anomaly + confidently benign -> watch tier; strong outliers must still alert
+U = ["isolation_forest+autoencoder"]
+weak = dict(iforest_score=-0.6455, iforest_threshold=-0.6338, autoencoder_error=0.5244, autoencoder_threshold=0.3465)
+strong = dict(iforest_score=-0.80, iforest_threshold=-0.6338, autoencoder_error=1.2, autoencoder_threshold=0.3465)
+ok2 = (is_weak_unsup(weak, U, 1.0) and not is_weak_unsup(strong, U, 1.0)
+       and not is_weak_unsup(weak, U, 0.3) and not is_weak_unsup(weak, ["supervised_xgboost"], 1.0))
+print(f"\n=== Weak-anomaly watch tier (and strong outliers still alert) -> {'OK' if ok2 else 'FAIL'}")
+(PASS if ok2 else FAIL).append("weak-anomaly watch tier")
 
 print(f"\nRESULT: {len(PASS)} passed, {len(FAIL)} failed  {FAIL if FAIL else ''}")
 sys.exit(1 if FAIL else 0)
