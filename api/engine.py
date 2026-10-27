@@ -282,8 +282,8 @@ class DefenseEngine:
             "fwd_pkt_len_mean": fb / fp if fp else 0.0, "bwd_pkt_len_mean": bb / bp if bp else 0.0,
             "avg_packet_size": tb / tp if tp else 0.0,
             "bytes_per_sec": tb / dur if dur > 0 else 0.0, "packets_per_sec": tp / dur if dur > 0 else 0.0,
-            "dst_port": f["dst_port"], "syn_count": f.get("syn_count", 0), "fin_count": f.get("fin_count", 0),
-            "rst_count": f.get("rst_count", 0), "psh_count": f.get("psh_count", 0), "ack_count": f.get("ack_count", 0),
+            "dst_port": f["dst_port"], "syn_count": min(1, f.get("syn_count", 0)), "fin_count": min(1, f.get("fin_count", 0)),
+            "rst_count": min(1, f.get("rst_count", 0)), "psh_count": min(1, f.get("psh_count", 0)), "ack_count": min(1, f.get("ack_count", 0)),
         }
         return {k: float(d[k]) for k in self.features}
 
@@ -346,7 +346,7 @@ class DefenseEngine:
         t0 = time.perf_counter()
         fv = features_override or self.build_features(f)
         n_pkts = f["fwd_packets"] + f["bwd_packets"]
-        ml_ok = features_override is not None or (n_pkts >= 2 and f["duration_sec"] > 0)
+        ml_ok = features_override is not None or (n_pkts >= 2 and f["duration_sec"] > 0 and f.get("protocol") in ("TCP", "UDP"))
 
         cands, ml = [], {"applied": ml_ok}
         X = err_vec = None

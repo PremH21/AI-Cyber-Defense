@@ -23,6 +23,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient, DESCENDING
+import certifi
 
 MODELS = {}
 MONGO_CLIENT = None
@@ -75,7 +76,10 @@ def load_models():
 async def lifespan(app: FastAPI):
     global MONGO_CLIENT, DB
     load_models()
-    MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
+    if MONGO_URI.startswith("mongodb+srv://") or "mongodb.net" in MONGO_URI:
+        MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where())
+    else:
+        MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     DB = MONGO_CLIENT[DB_NAME]
     try:
         MONGO_CLIENT.server_info()
@@ -205,12 +209,13 @@ def get_stats():
     if DB is None:
         raise HTTPException(503, "Database not connected")
     total = DB[INCIDENTS_COLLECTION].count_documents({})
+    labeled_total = DB[INCIDENTS_COLLECTION].count_documents({"correct": {"$exists": True}})
     correct = DB[INCIDENTS_COLLECTION].count_documents({"correct": True})
     attacks = DB[INCIDENTS_COLLECTION].count_documents({"predicted_label": "attack"})
     avg_cursor = DB[INCIDENTS_COLLECTION].aggregate([{"$group": {"_id": None, "avg_ms": {"$avg": "$detection_latency_ms"}}}])
     avg_latency = next(avg_cursor, {}).get("avg_ms", 0)
     return {"total_incidents_processed": total,
-            "accuracy": round(correct / total, 4) if total else None,
+            "accuracy": round(correct / labeled_total, 4) if labeled_total else None,
             "attacks_detected": attacks,
             "avg_detection_latency_ms": round(avg_latency, 3) if avg_latency else None}
 

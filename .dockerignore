@@ -1,0 +1,16 @@
+data/
+!data/processed/unsw-nb15_test.parquet
+*.csv
+__pycache__/
+.env
+.DS_Store
+.ipynb_checkpoints/
+venv/
+*.pyc
+.git/
+lineage/
+prediction/
+notebooks/
+xai-dashboard/
+honeypot/
+federated/
