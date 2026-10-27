@@ -83,6 +83,28 @@ BEACON_MIN_N, BEACON_MAX_CV, BEACON_MIN_SPAN = 10, 0.10, 60
 EXFIL_BYTES, EXFIL_WIN = 100e6, 120
 IGNORED_PORTS = {53, 67, 68, 123, 137, 138, 1900, 5353, 5355}
 COOLDOWN = 60
+KEEPALIVE_PORTS = {80, 443}
+
+
+def _own_nets():
+    nets = []
+    try:
+        import psutil
+        for addrs in psutil.net_if_addrs().values():
+            for a in addrs:
+                try:
+                    ip = ipaddress.ip_address(a.address.split("%")[0])
+                except ValueError:
+                    continue
+                if ip.is_loopback or ip.is_multicast or ip.is_unspecified:
+                    continue
+                nets.append(ipaddress.ip_network(f"{ip}/{64 if ip.version == 6 else 24}", strict=False))
+    except Exception:
+        pass
+    return nets
+
+
+LOCAL_NETS = _own_nets()
 
 
 def _ip(s):
@@ -94,7 +116,7 @@ def _ip(s):
 
 def is_private(s):
     a = _ip(s)
-    return bool(a and (a.is_private or a.is_link_local) and not a.is_loopback)
+    return bool(a and not a.is_loopback and (a.is_private or a.is_link_local or any(n.version == a.version and a in n for n in LOCAL_NETS)))
 
 
 def is_ignorable(s):
@@ -109,6 +131,35 @@ def band(sev):
 # --------------------------------------------------------------------------
 # Behavioural layer: needs no training data, works on any network.
 # --------------------------------------------------------------------------
+UNSUP_ONLY_LAYERS = {"isolation_forest+autoencoder", "isolation_forest", "autoencoder"}
+
+
+def guard_action(action, src, layers, benign_prob=0.0):
+    """Anomaly-only evidence (no supervised or behavioural finding) may never block.
+    Caps to alert_only when the supervised model is confident the flow is benign,
+    otherwise to quarantine."""
+    if action == "block" and layers and set(layers) <= UNSUP_ONLY_LAYERS:
+        if benign_prob >= 0.9:
+            return "alert_only", "guard:unsup_only_cap"
+        return "quarantine", "guard:unsup_only_cap"
+    return action, src
+
+
+# Weak-evidence tier: anomaly-only finding, supervised model confidently benign, and both
+# unsupervised scores only just past their thresholds -> log as a low-severity watch,
+# not an alert. Strong outliers still alert. Starting values; tune with diagnose_unsup.py.
+WEAK_AE_RATIO = 2.0
+WEAK_IF_MARGIN = 0.05
+
+
+def is_weak_unsup(unsup, layers, benign_prob):
+    if not layers or not set(layers) <= UNSUP_ONLY_LAYERS or benign_prob < 0.9:
+        return False
+    ae_ratio = unsup["autoencoder_error"] / max(unsup["autoencoder_threshold"], 1e-9)
+    if_margin = unsup["iforest_threshold"] - unsup["iforest_score"]
+    return ae_ratio < WEAK_AE_RATIO and if_margin < WEAK_IF_MARGIN
+
+
 class BehaviourTracker:
     def __init__(self):
         self.by_src = defaultdict(lambda: deque(maxlen=6000))
@@ -211,7 +262,7 @@ class BehaviourTracker:
                 det("exfiltration", vol, EXFIL_BYTES, EXFIL_WIN, {"bytes_sent": int(vol), "external_host": dst})
 
         # C2 beaconing: very regular connections to one external host
-        if not is_private(dst) and dport not in IGNORED_PORTS:
+        if not is_private(dst) and dport not in IGNORED_PORTS and dport != 0 and proto in ("TCP", "UDP"):
             st = self.starts[(src, dst, dport)]
             st.append(now)
             if len(st) >= BEACON_MIN_N:
@@ -247,6 +298,15 @@ class DefenseEngine:
         self.iso = joblib.load(f"{model_dir}/live_iforest.joblib")
         self.ae = joblib.load(f"{model_dir}/live_autoencoder.joblib")
         self.scaler = joblib.load(f"{model_dir}/live_unsup_scaler.joblib")
+        self.ucols, self.uscaler, self.uiso, self.uae = self.features, self.scaler, self.iso, self.ae
+        self.unsup_model = "V0"
+        vp = f"{model_dir}/variants/V2a.joblib"
+        if os.path.exists(vp):
+            v = joblib.load(vp)
+            self.ucols, self.uscaler, self.uiso, self.uae = v["cols"], v["scaler"], v["iso"], v["ae"]
+            self.iso_thr, self.ae_thr = float(v["iso_t"]), float(v["ae_t"])
+            self.unsup_model = "V2a"
+            print("Unsupervised layer: V2a (RST-free), features:", len(self.ucols), flush=True)
         self.tracker = BehaviourTracker()
         self.explainer = None
         self.q = {}
@@ -294,10 +354,10 @@ class DefenseEngine:
         return X, p
 
     def unsupervised(self, fv):
-        x = np.array([[fv[k] for k in self.features]], dtype=float)
-        Z = self.scaler.transform(np.log1p(np.clip(x, 0, None)))
-        iso_score = float(self.iso.score_samples(Z)[0])
-        err_vec = (self.ae.predict(Z) - Z)[0] ** 2
+        x = np.array([[fv[k] for k in self.ucols]], dtype=float)
+        Z = self.uscaler.transform(np.log1p(np.clip(x, 0, None)))
+        iso_score = float(self.uiso.score_samples(Z)[0])
+        err_vec = (self.uae.predict(Z) - Z)[0] ** 2
         ae_err = float(err_vec.mean())
         return {"iforest_score": round(iso_score, 4), "iforest_flag": bool(iso_score < self.iso_thr),
                 "autoencoder_error": round(ae_err, 4), "autoencoder_flag": bool(ae_err > self.ae_thr),
@@ -366,7 +426,8 @@ class DefenseEngine:
         dets = self.tracker.update(f) if use_tracker else []
         for d in dets:
             cands.append({"layer": f"behavioural:{d['type']}", "kind": "behavioural_detection",
-                          "tax": BEHAVIOUR_TAXONOMY[d["type"]], "conf": d["confidence"], "det": d})
+                          "tax": BEHAVIOUR_TAXONOMY[d["type"]], "conf": d["confidence"], "det": d,
+                          "watch": d["type"] == "beaconing" and int(f["dst_port"]) in KEEPALIVE_PORTS})
 
         # Both unsupervised models agreeing is a zero-day suspicion only when nothing
         # more specific explains the flow; otherwise it corroborates the specific finding.
@@ -377,11 +438,15 @@ class DefenseEngine:
                 corroborated_by_unsup = True
             else:
                 cands.append({"layer": "isolation_forest+autoencoder", "kind": "suspected_zero_day",
-                              "tax": BEHAVIOUR_TAXONOMY["zero_day"], "conf": 0.7})
+                              "tax": BEHAVIOUR_TAXONOMY["zero_day"], "conf": 0.7, "watch": True})
 
         asset = self.asset_level(f["dst_ip"], f["dst_port"])
         rec = self._base_record(f, fv, ml, asset)
 
+        watch = [c for c in cands if c.get("watch")]
+        cands = [c for c in cands if not c.get("watch")]
+        if not cands and watch:
+            self._watch_record(rec, watch[0], X, err_vec, fv)
         if cands:
             for c in cands:
                 c["potential"] = c["tax"][4] * (0.5 + 0.5 * c["conf"])
@@ -391,14 +456,33 @@ class DefenseEngine:
             layers = sorted({c["layer"] for c in cands} | ({"isolation_forest+autoencoder"} if corroborated_by_unsup else set()))
             sev = self.severity(base, p["conf"], asset, corroborated=len(layers) > 1)
             action, src = self.choose_action(threat, sev, asset)
+            benign_p = 1.0 - ml.get("attack_probability", 1.0) if ml_ok else 0.0
+            action, src = guard_action(action, src, layers, benign_p)
             rec.update({"verdict": p["kind"], "predicted_label": "attack", "attack_type": attack_type,
                         "category": category, "slide_category": slide, "threat_type": threat,
                         "confidence": round(p["conf"], 4), "severity": sev, "severity_band": band(sev),
                         "action_taken": action, "action_source": src, "detection_layers": layers,
                         "also_detected": [c["tax"][0] for c in cands[1:]]})
             rec["explanation"], rec["why"] = self._explain(p, X, err_vec, attack_type, fv)
+            if ml_ok and is_weak_unsup(ml["unsupervised"], layers, benign_p):
+                rec.update({"verdict": "anomaly_watch", "predicted_label": "benign", "severity": 2,
+                            "severity_band": band(2), "action_taken": "allow",
+                            "action_source": "guard:weak_unsup_watch"})
+                rec["why"] += (" Downgraded to a low-severity watch: the supervised model is "
+                               "confident this flow is benign and both anomaly scores are only "
+                               "marginally past their thresholds.")
         rec["latency_ms"] = round((time.perf_counter() - t0) * 1000, 2)
         return rec
+
+    def _watch_record(self, rec, c, X, err_vec, fv):
+        t = c["tax"]
+        rec.update({"verdict": "anomaly_watch", "predicted_label": "watch", "attack_type": "Watch: " + t[0],
+                    "category": "Anomaly Watch", "slide_category": t[2], "threat_type": t[3],
+                    "confidence": round(c["conf"], 4), "severity": 2, "severity_band": "LOW",
+                    "action_taken": "alert_only", "action_source": "safety_cap",
+                    "detection_layers": [c["layer"]], "also_detected": []})
+        rec["explanation"], rec["why"] = self._explain(c, X, err_vec, t[0], fv)
+        rec["why"] = "[Watch only - not escalated, no automatic action] " + rec["why"]
 
     def analyze_event(self, ev):
         """Non-flow events, e.g. ARP spoofing seen by the agent."""
@@ -449,7 +533,7 @@ class DefenseEngine:
                     f"Strongest SHAP drivers: {drivers}.")
         if p["kind"] == "suspected_zero_day":
             idx = np.argsort(err_vec)[::-1][:5]
-            top5 = [{"feature": self.features[i], "value": round(fv[self.features[i]], 4),
+            top5 = [{"feature": self.ucols[i], "value": round(fv[self.ucols[i]], 4),
                      "reconstruction_error": round(float(err_vec[i]), 4)} for i in idx]
             return ({"type": "autoencoder_reconstruction_error", "top_5_features": top5},
                     "Matches no known attack class, but both unsupervised models (Isolation Forest and the "

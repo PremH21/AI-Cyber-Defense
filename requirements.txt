@@ -13,3 +13,4 @@ shap==0.51.0
 python-multipart==0.0.32
 requests
 certifi
+psutil
